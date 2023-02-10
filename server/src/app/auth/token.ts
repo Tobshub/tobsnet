@@ -44,6 +44,17 @@ const token = {
       return { ok: false, message: "could not validate token" } as const;
     }
   },
+
+  /** Decode jwt token */
+  async decode(token: string) {
+    try {
+      const { payload } = jwt.decode(token) as { iat: number; payload: string };
+      return { ok: true, data: payload } as const;
+    } catch (error) {
+      console.error(error);
+      return { ok: false, message: "an error occured" } as const;
+    }
+  },
 };
 
 export default token;
