@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { config } from "dotenv";
-import { PrismaConnect } from "./config/prisma";
+import { PrismaConnect } from "./config";
 import trpcRouter from "./app/router";
 
 config();
@@ -16,7 +16,7 @@ export const env = {
 const app = express();
 app.use(cors(), express.json());
 
-// /api endpoints use trpcRouter
+// "/api" endpoints use trpcRouter
 app.use("/api", trpcRouter);
 
 app.use("/", (req, res) => {

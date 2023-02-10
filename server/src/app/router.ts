@@ -1,5 +1,5 @@
-import { createContext, tRouter } from "../config/trpc";
 import * as trpcExpress from "@trpc/server/adapters/express";
+import { createContext, tRouter } from "../config";
 import userRouter from "./users/user-router";
 import postRouter from "./posts/post-router";
 

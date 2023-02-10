@@ -1,13 +1,18 @@
-import { tProcedure, tRouter } from "../../config/trpc";
+import { z } from "zod";
+import { tProcedure, tRouter } from "../../config";
+import { loadFeed } from "./controllers";
 
 const postRouter = tRouter({
-  loadFeed: tProcedure.query(async ({ ctx }) => {
-    if (ctx.auth) {
-      // load custom feed
-    } else {
-      // load random feed
-    }
-  }),
+  loadFeed: tProcedure
+    .input(z.object({ cursor: z.string().nullish() }))
+    .query(async ({ input, ctx }) => {
+      const { token } = ctx.auth;
+      if (!token) {
+        // load random feed
+        return;
+      }
+      const feed = await loadFeed({ token, size: 20, cursor: input.cursor });
+    }),
 });
 
 export default postRouter;

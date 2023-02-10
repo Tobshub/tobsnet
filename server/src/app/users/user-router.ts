@@ -1,4 +1,4 @@
-import { tRouter, tProcedure, tError } from "../../config/trpc";
+import { tRouter, tProcedure, tError } from "../../config";
 import z from "zod";
 import { signUp, login } from "./controllers/exports";
 
@@ -49,7 +49,9 @@ const userRouter = tRouter({
           password: z.string().min(8).max(64),
         }),
         options: z.object({
-          expires: z.union([z.literal("short"), z.literal("long")]),
+          expires: z
+            .union([z.literal("short"), z.literal("long")])
+            .default("short"),
         }),
       })
     )
