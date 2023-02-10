@@ -14,7 +14,7 @@ export async function loadFeed(props: props) {
     if (props.token) {
       const decoded = await token.decode(props.token);
       if (!decoded.ok) {
-        return { ok: false, message: "an error occured" };
+        return { ok: false, message: "an error occured" } as const;
       }
 
       const id = decoded.data;
@@ -36,7 +36,7 @@ export async function loadFeed(props: props) {
     }
   } catch (error) {
     console.error(error);
-    return { ok: false, message: "an error occured" };
+    return { ok: false, message: "an error occured" } as const;
   }
 }
 
