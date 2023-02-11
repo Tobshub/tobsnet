@@ -23,17 +23,21 @@ export async function loadFeed(props: props) {
 
       switch (genFeed.ok) {
         case true: {
-          return { ok: genFeed.ok, data: genFeed.data };
+          return { ok: genFeed.ok, data: genFeed.data } as const;
         }
         case false: {
           return {
             ok: genFeed.ok,
             message: "failed to generate feed",
             cause: genFeed.message,
-          };
+          } as const;
+        }
+        default: {
+          throw new Error("something unexpected happened");
         }
       }
     }
+    return { ok: false, message: "user token is missing" } as const;
   } catch (error) {
     console.error(error);
     return { ok: false, message: "an error occured" } as const;
