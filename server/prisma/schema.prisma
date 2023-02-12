@@ -16,7 +16,7 @@ model User {
   email         String         @unique
   password      String
   bio           String
-  profileImage  Bytes
+  profileImage  Bytes?
   posts         Post[]
   likedPosts    Post[]         @relation(name: "Likes", fields: [likedPostsIds], references: [id])
   likedPostsIds String[]       @db.ObjectId
