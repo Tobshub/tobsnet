@@ -30,14 +30,14 @@ model Post {
   slug          String    @unique
   content       String  
   createdAt     DateTime  @map("createdAt") @db.Timestamp @default(now())
-  likes         Int
+  likes         Int       @default(0)
   comments      Comment[]
-  commentCount  Int
+  commentCount  Int       @default(0)
 }
 
 type Notification {
   content     String
-  createdAt   DateTime @db.Timestamp @default(now())
+  createdAt   DateTime          @db.Timestamp @default(now())
   type        NotificationType
 }
 
@@ -54,7 +54,7 @@ enum NotificationType {
 }
 
 type Comment {
-  createdAt   DateTime @db.Timestamp @default(now())
+  createdAt   DateTime    @db.Timestamp @default(now())
   user        UserRef
   content     String
   likes       Int
