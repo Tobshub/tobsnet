@@ -14,6 +14,7 @@ export async function getPost(slug: string) {
           select: {
             username: true,
             id: true,
+            profileImage: true,
           },
         },
       },
