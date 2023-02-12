@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { tError, tProcedure, tRouter } from "../../config";
-import { loadFeed } from "./controllers";
+import { getPost, loadFeed, newPost } from "./controllers";
 
 const postRouter = tRouter({
   loadFeed: tProcedure
@@ -8,7 +8,7 @@ const postRouter = tRouter({
     .query(async ({ input, ctx }) => {
       const { token } = ctx.auth;
       if (!token) {
-        // load random feed
+        // TODO: load random feed
         throw new tError({ message: "no user token", code: "UNAUTHORIZED" });
       }
       const res = await loadFeed({ token, size: 20, cursor: input.cursor });
@@ -43,6 +43,59 @@ const postRouter = tRouter({
             code: "BAD_REQUEST",
             cause: "unknown",
           });
+        }
+      }
+    }),
+  newPost: tProcedure
+    .input(
+      z.object({
+        content: z.string().max(200),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { token } = ctx.auth;
+      const createPost = await newPost(token, input.content);
+
+      switch (createPost.ok) {
+        case true: {
+          return { ok: true, data: createPost.data };
+        }
+        case false: {
+          throw new tError({
+            message: createPost.message,
+            code:
+              createPost.message === "user token is missing"
+                ? "UNAUTHORIZED"
+                : "INTERNAL_SERVER_ERROR",
+            cause: createPost.cause,
+          });
+        }
+      }
+    }),
+  getPost: tProcedure
+    .input(z.object({ slug: z.string() }))
+    .query(async ({ input }) => {
+      const post = await getPost(input.slug);
+      switch (post.ok) {
+        case true: {
+          return { ok: post.ok, data: post.data };
+        }
+        case false: {
+          switch (post.message) {
+            case "post not found": {
+              throw new tError({
+                message: "no post was found",
+                code: "NOT_FOUND",
+                cause: post.message,
+              });
+            }
+            case "an error occured": {
+              throw new tError({
+                message: post.message,
+                code: "INTERNAL_SERVER_ERROR",
+              });
+            }
+          }
         }
       }
     }),
