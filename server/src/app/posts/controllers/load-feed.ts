@@ -62,6 +62,7 @@ async function generateFeed(userId: string, cursor?: props["cursor"]) {
         commentCount: true,
         likes: true,
         slug: true,
+        id: true,
         user: { select: { username: true } },
         createdAt: true,
         content: true,
