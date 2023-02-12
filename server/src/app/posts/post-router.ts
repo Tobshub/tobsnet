@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { tError, tProcedure, tRouter } from "../../config";
 import { getPost, loadFeed, newPost } from "./controllers";
+import postActionRouter from "./actions/actions-router";
 
 const postRouter = tRouter({
   loadFeed: tProcedure
@@ -11,27 +12,27 @@ const postRouter = tRouter({
         // TODO: load random feed
         throw new tError({ message: "no user token", code: "UNAUTHORIZED" });
       }
-      const res = await loadFeed({ token, size: 20, cursor: input.cursor });
+      const feed = await loadFeed({ token, size: 20, cursor: input.cursor });
 
-      switch (res.ok) {
+      switch (feed.ok) {
         case true: {
-          return { ok: res.ok, data: res.data };
+          return { ok: feed.ok, data: feed.data };
         }
         case false: {
-          switch (res.message) {
+          switch (feed.message) {
             case "an error occured":
             case "failed to generate feed": {
               throw new tError({
                 message: "an error occured",
                 code: "INTERNAL_SERVER_ERROR",
-                cause: res.message,
+                cause: feed.message,
               });
             }
             case "user token is missing": {
               throw new tError({
                 message: "please sign up or login",
                 code: "UNAUTHORIZED",
-                cause: res.message,
+                cause: feed.message,
               });
             }
           }
@@ -99,6 +100,7 @@ const postRouter = tRouter({
         }
       }
     }),
+  actions: postActionRouter,
 });
 
 export default postRouter;
