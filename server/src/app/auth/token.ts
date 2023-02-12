@@ -39,7 +39,7 @@ const token = {
       }
       // verify the token and return the payload
       const isValidToken = jwt.verify(token, env.jwtSecret) as Payload;
-      return { ok: true, token: isValidToken.data } as const;
+      return { ok: true, data: isValidToken.data } as const;
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
         return { ok: false, message: "token expired" } as const;
