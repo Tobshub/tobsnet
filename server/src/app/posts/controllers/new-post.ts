@@ -8,7 +8,7 @@ export async function newPost(userToken: string | undefined, content: string) {
       return { ok: false, message: "user token is missing" } as const;
     }
     // validate the user token
-    const validateToken = await token.decode(userToken);
+    const validateToken = await token.validate(userToken);
     if (!validateToken.ok) {
       throw new Error(validateToken.message);
     }
