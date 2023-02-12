@@ -1,6 +1,6 @@
 import { tRouter, tProcedure, tError } from "../../config";
 import z from "zod";
-import { signUp, login } from "./controllers/exports";
+import { signUp, login } from "./controllers";
 
 /** endpoints for user-related operations */
 const userRouter = tRouter({
