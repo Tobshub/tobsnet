@@ -10,40 +10,42 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
-  id                  String    @id @default(auto()) @map("_id") @db.ObjectId
-  username            String 
-  email               String    @unique
-  password            String
-  bio                 String
-  posts               Post[]
-  notifications       Notification[]
-  followers           UserRef[]
-  following           UserRef[]
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  username      String
+  email         String         @unique
+  password      String
+  bio           String
+  profileImage  Bytes
+  posts         Post[]
+  likedPosts    Post[]         @relation(name: "Likes", fields: [likedPostsIds], references: [id])
+  likedPostsIds String[]       @db.ObjectId
+  comments      Comment[]
+  notifications Notification[]
+  followers     User[]         @relation("Following", fields: [followersIds], references: [id])
+  followersIds  String[]       @db.ObjectId
+  following     User[]         @relation("Following", fields: [followingIds], references: [id])
+  followingIds  String[]       @db.ObjectId
 }
 
 model Post {
-  id            String    @id @default(auto()) @map("_id") @db.ObjectId
-  user          User      @relation(fields: [userId], references: [id])
-  userId        String    @db.ObjectId
-  slug          String    @unique
-  content       String  
-  createdAt     DateTime  @map("createdAt") @db.Timestamp @default(now())
-  likes         Int       @default(0)
-  comments      Comment[]
-  commentCount  Int       @default(0)
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  user         User      @relation(fields: [userId], references: [id])
+  userId       String    @db.ObjectId
+  slug         String    @unique
+  content      String
+  createdAt    DateTime  @default(now()) @map("createdAt") @db.Timestamp
+  likes        Int       @default(0)
+  likesUser    User[]    @relation(name: "Likes", fields: [likesUserIds], references: [id])
+  likesUserIds String[]  @db.ObjectId
+  comments     Comment[]
+  commentCount Int       @default(0)
 }
 
 type Notification {
-  content     String
-  createdAt   DateTime          @db.Timestamp @default(now())
-  type        NotificationType
-}
-
-type UserRef {
-  userId    String @db.ObjectId
-  username  String
+  content   String
+  createdAt DateTime         @default(now()) @db.Timestamp
+  type      NotificationType
 }
 
 enum NotificationType {
@@ -53,11 +55,17 @@ enum NotificationType {
   REPLY
 }
 
-type Comment {
-  createdAt   DateTime    @db.Timestamp @default(now())
-  user        UserRef
-  content     String
-  likes       Int
-  replyCount  Int
-  replies     Comment[]
+model Comment {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt  DateTime  @default(now()) @db.Timestamp
+  user       User      @relation(fields: [userId], references: [id])
+  userId     String    @db.ObjectId
+  post       Post      @relation(fields: [postId], references: [id])
+  postId     String    @db.ObjectId
+  content    String
+  likes      Int
+  replyCount Int
+  parentId   String?   @db.ObjectId
+  parent     Comment?  @relation("Replies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies    Comment[] @relation("Replies")
 }
