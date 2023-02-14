@@ -63,8 +63,8 @@ model Comment {
   post       Post      @relation(fields: [postId], references: [id])
   postId     String    @db.ObjectId
   content    String
-  likes      Int
-  replyCount Int
+  likes      Int       @default(0)
+  replyCount Int       @default(0)
   parentId   String?   @db.ObjectId
   parent     Comment?  @relation("Replies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   replies    Comment[] @relation("Replies")
