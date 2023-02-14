@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { tError, tProcedure, tRouter } from "../../../config";
-import { addComment, deletePost, likePost } from "./controllers";
+import { addComment, deletePost, likePost, unlikePost } from "./controllers";
 // TODO:
 // unlike post
-// comment on post/comment -> infinity
+// comment on comment
 const postActionRouter = tRouter({
   likePost: tProcedure
     .input(
@@ -50,7 +50,40 @@ const postActionRouter = tRouter({
         postId: z.string(),
       })
     )
-    .mutation(async ({ ctx, input }) => {}),
+    .mutation(async ({ ctx, input }) => {
+      const { token } = ctx.auth;
+      if (!token) {
+        throw new tError({
+          code: "FORBIDDEN",
+          message: "user token is missing",
+        });
+      }
+      const post = await unlikePost(token, input.postId);
+
+      if (post.ok) {
+        return { ok: true, data: post.data } as const;
+      } else {
+        switch (post.message) {
+          case "an error occured": {
+            throw new tError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: post.message,
+              cause: post.cause,
+            });
+          }
+          case "post not found": {
+            throw new tError({ code: "NOT_FOUND", message: post.message });
+          }
+          case "token validation failed": {
+            throw new tError({
+              code: "UNAUTHORIZED",
+              message: post.message,
+              cause: post.cause,
+            });
+          }
+        }
+      }
+    }),
   deletePost: tProcedure
     .input(
       z.object({
