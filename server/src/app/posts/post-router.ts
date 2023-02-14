@@ -12,7 +12,7 @@ const postRouter = tRouter({
       const { token } = ctx.auth;
       if (!token) {
         // TODO: load random feed
-        throw new tError({ message: "no user token", code: "UNAUTHORIZED" });
+        throw new tError({ message: "no user token", code: "FORBIDDEN" });
       }
       const feed = await loadFeed({ token, size: 20, cursor: input.cursor });
 
@@ -57,21 +57,32 @@ const postRouter = tRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const { token } = ctx.auth;
+      if (!token) {
+        throw new tError({
+          code: "FORBIDDEN",
+          message: "user token is missing",
+        });
+      }
       const createPost = await newPost(token, input.content);
 
-      switch (createPost.ok) {
-        case true: {
-          return { ok: true, data: createPost.data };
-        }
-        case false: {
-          throw new tError({
-            message: createPost.message,
-            code:
-              createPost.message === "user token is missing"
-                ? "UNAUTHORIZED"
-                : "INTERNAL_SERVER_ERROR",
-            cause: createPost.cause,
-          });
+      if (createPost.ok) {
+        return { ok: true, data: createPost.data } as const;
+      } else {
+        switch (createPost.message) {
+          case "an error occurred": {
+            throw new tError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: createPost.message,
+              cause: createPost.cause,
+            });
+          }
+          case "token validation failed": {
+            throw new tError({
+              code: "UNAUTHORIZED",
+              message: createPost.message,
+              cause: createPost.cause,
+            });
+          }
         }
       }
     }),
