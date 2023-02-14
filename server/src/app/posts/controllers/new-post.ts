@@ -2,15 +2,16 @@ import { usePrisma } from "../../../config";
 import token from "../../auth/token";
 
 /** Create a new post */
-export async function newPost(userToken: string | undefined, content: string) {
+export async function newPost(userToken: string, content: string) {
   try {
-    if (!userToken) {
-      return { ok: false, message: "user token is missing" } as const;
-    }
     // validate the user token
     const validateToken = await token.validate(userToken);
     if (!validateToken.ok) {
-      throw new Error(validateToken.message);
+      return {
+        ok: false,
+        message: "token validation failed",
+        cause: validateToken.message,
+      } as const;
     }
 
     const slug = await genSlug(validateToken.data);
@@ -23,6 +24,7 @@ export async function newPost(userToken: string | undefined, content: string) {
       },
       select: {
         slug: true,
+        id: true,
       },
     });
     return { ok: true, data: createPost } as const;
