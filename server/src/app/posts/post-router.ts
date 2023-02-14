@@ -5,7 +5,9 @@ import postActionRouter from "./actions/actions-router";
 
 const postRouter = tRouter({
   loadFeed: tProcedure
-    .input(z.object({ cursor: z.string().nullish() }))
+    .input(
+      z.object({ cursor: z.string().nullish() }).default({ cursor: undefined })
+    )
     .query(async ({ input, ctx }) => {
       const { token } = ctx.auth;
       if (!token) {
