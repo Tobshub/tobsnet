@@ -1,6 +1,7 @@
 import { tRouter, tProcedure, tError } from "../../config";
 import z from "zod";
 import { signUp, login } from "./controllers";
+import token from "../auth/token";
 
 /** endpoints for user-related operations */
 const userRouter = tRouter({
@@ -84,6 +85,14 @@ const userRouter = tRouter({
         }
       }
     }),
+  validateToken: tProcedure.query(async ({ ctx }) => {
+    const { token: userToken } = ctx.auth;
+    if (!userToken) {
+      return { ok: false, message: "token is missing" };
+    }
+    const valid = await token.validate(userToken);
+    return valid;
+  }),
 });
 
 export default userRouter;
