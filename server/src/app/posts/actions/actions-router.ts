@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { tError, tProcedure, tRouter } from "../../../config";
-import { deletePost, likePost } from "./controllers";
+import { addComment, deletePost, likePost } from "./controllers";
 // TODO:
 // unlike post
 // comment on post/comment -> infinity
@@ -15,7 +15,7 @@ const postActionRouter = tRouter({
       const { token } = ctx.auth;
       if (!token) {
         throw new tError({
-          code: "UNAUTHORIZED",
+          code: "FORBIDDEN",
           message: "user token is missing",
         });
       }
@@ -28,13 +28,18 @@ const postActionRouter = tRouter({
             throw new tError({
               code: "INTERNAL_SERVER_ERROR",
               message: post.message,
+              cause: post.cause,
             });
           }
           case "post not found": {
             throw new tError({ code: "NOT_FOUND", message: post.message });
           }
           case "token validation failed": {
-            throw new tError({ code: "UNAUTHORIZED", message: post.message });
+            throw new tError({
+              code: "UNAUTHORIZED",
+              message: post.message,
+              cause: post.cause,
+            });
           }
         }
       }
@@ -56,7 +61,7 @@ const postActionRouter = tRouter({
       const { token } = ctx.auth;
       if (!token) {
         throw new tError({
-          code: "UNAUTHORIZED",
+          code: "FORBIDDEN",
           message: "user token is missing",
         });
       }
@@ -78,6 +83,44 @@ const postActionRouter = tRouter({
               code: "UNAUTHORIZED",
               message: "can not delete that post",
               cause: deletedPost.message,
+            });
+          }
+        }
+      }
+    }),
+  addComment: tProcedure
+    .input(z.object({ postId: z.string(), content: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      const { token } = ctx.auth;
+      if (!token) {
+        throw new tError({
+          code: "FORBIDDEN",
+          message: "user token is missing",
+        });
+      }
+      const comment = await addComment(token, input.postId, {
+        content: input.content,
+      });
+
+      if (comment.ok) {
+        return { ok: true, data: comment.data } as const;
+      } else {
+        switch (comment.message) {
+          case "an error occured": {
+            throw new tError({
+              message: comment.message,
+              code: "INTERNAL_SERVER_ERROR",
+              cause: comment.cause,
+            });
+          }
+          case "post not found": {
+            throw new tError({ code: "NOT_FOUND", message: comment.message });
+          }
+          case "token validation failed": {
+            throw new tError({
+              code: "UNAUTHORIZED",
+              message: comment.message,
+              cause: comment.cause,
             });
           }
         }
