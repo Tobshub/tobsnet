@@ -2,14 +2,12 @@ import { z } from "zod";
 import { tError, tProcedure, tRouter } from "../../../config";
 import { deletePost, likePost } from "./controllers";
 // TODO:
-// delete post
 // unlike post
 // comment on post/comment -> infinity
 const postActionRouter = tRouter({
   likePost: tProcedure
     .input(
       z.object({
-        slug: z.string(),
         postId: z.string(),
       })
     )
@@ -21,10 +19,7 @@ const postActionRouter = tRouter({
           message: "user token is missing",
         });
       }
-      const post = await likePost(token, {
-        slug: input.slug,
-        id: input.postId,
-      });
+      const post = await likePost(token, input.postId);
       if (post.ok) {
         return { ok: true, data: post.data };
       } else {
@@ -47,7 +42,6 @@ const postActionRouter = tRouter({
   unlikePost: tProcedure
     .input(
       z.object({
-        slug: z.string(),
         postId: z.string(),
       })
     )
@@ -55,7 +49,6 @@ const postActionRouter = tRouter({
   deletePost: tProcedure
     .input(
       z.object({
-        slug: z.string(),
         postId: z.string(),
       })
     )
@@ -68,10 +61,7 @@ const postActionRouter = tRouter({
         });
       }
 
-      const deletedPost = await deletePost(token, {
-        id: input.postId,
-        slug: input.slug,
-      });
+      const deletedPost = await deletePost(token, input.postId);
 
       if (deletedPost.ok) {
         return { ok: true, data: deletedPost.data } as const;

@@ -1,10 +1,8 @@
 import { usePrisma } from "../../../../config";
 import token from "../../../auth/token";
 
-type postProps = { slug: string; id: string };
-
 /** Like a post */
-export async function likePost(userToken: string, postData: postProps) {
+export async function likePost(userToken: string, id: string) {
   try {
     // validate token
     const isValidToken = await token.validate(userToken);
@@ -19,9 +17,7 @@ export async function likePost(userToken: string, postData: postProps) {
 
     // update record
     const post = await usePrisma.post.update({
-      where: {
-        slug: postData.slug,
-      },
+      where: { id },
       data: {
         likes: { increment: 1 },
         likesUsersIds: { push: isValidToken.data },
@@ -29,7 +25,7 @@ export async function likePost(userToken: string, postData: postProps) {
           // update the user record
           update: {
             where: { id: isValidToken.data },
-            data: { likedPostsIds: { push: postData.id } },
+            data: { likedPostsIds: { push: id } },
           },
         },
       },

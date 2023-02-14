@@ -1,12 +1,7 @@
 import { usePrisma } from "../../../../config";
 import token from "../../../auth/token";
 
-type postProps = {
-  slug: string;
-  id: string;
-};
-
-export async function deletePost(userToken: string, postData: postProps) {
+export async function deletePost(userToken: string, id: string) {
   try {
     // validate token
     const isValidToken = await token.validate(userToken);
@@ -23,7 +18,7 @@ export async function deletePost(userToken: string, postData: postProps) {
     const isUserPost = await usePrisma.user.findUnique({
       where: { id: isValidToken.data },
       select: {
-        posts: { where: { ...postData }, select: { id: true, slug: true } },
+        posts: { where: { id }, select: { id: true } },
       },
     });
 
@@ -34,12 +29,12 @@ export async function deletePost(userToken: string, postData: postProps) {
       } as const;
     }
 
-    const finish = await deletePostAndComments({ ...postData });
+    const finish = await deletePostAndComments(id);
 
     if (!finish.ok) {
       throw new Error(finish.message);
     }
-    return { ok: true, data: postData } as const;
+    return { ok: true, data: { id } } as const;
   } catch (error) {
     console.error(error);
     if (error instanceof Error) {
@@ -53,12 +48,12 @@ export async function deletePost(userToken: string, postData: postProps) {
   }
 }
 
-async function deletePostAndComments({ id, slug }: postProps) {
+async function deletePostAndComments(id: string) {
   try {
     const deleteRelatedComments = usePrisma.comment.deleteMany({
       where: { postId: id },
     });
-    const deletePost = usePrisma.post.delete({ where: { id, slug } });
+    const deletePost = usePrisma.post.delete({ where: { id } });
 
     const finalize = await usePrisma.$transaction([
       deleteRelatedComments,
