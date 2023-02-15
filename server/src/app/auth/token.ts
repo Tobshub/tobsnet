@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { env } from "../..";
+import { NotOk, Ok } from "../../helpers";
 
 type Payload = {
   iat: number;
@@ -8,25 +9,20 @@ type Payload = {
 
 const token = {
   /** Generate new jwt token */
-  async generate(
-    payloadInput: string,
-    options?: { expires: "short" | "long" }
-  ) {
+  async generate(payloadInput: string, options?: { expires: "short" | "long" }) {
     try {
       if (!env.jwtSecret) {
-        console.error("jwt secret missing");
-        return { ok: false, message: "jwt secret is missing" } as const;
+        return NotOk("jwt secret is missing", undefined);
       }
       const payload = { iat: Date.now(), data: payloadInput };
       /* short logins expire after 1 day */
-      const expiresIn = options?.expires === "long" ? "30d" : "1d";
+      const expiresIn = options?.expires === "long" ? 60 * 60 * 24 * 30 : 60 * 60 * 24;
 
       /** generated token from @param payloadInput and `jwt secret` */
       const token = jwt.sign(payload, env.jwtSecret, { expiresIn });
-      return { ok: true, token } as const;
+      return Ok(token);
     } catch (error) {
-      console.error(error);
-      return { ok: false, message: "could not generate token" } as const;
+      return NotOk("could not generate token", error instanceof Error ? error.message : undefined);
     }
   },
 
@@ -34,31 +30,28 @@ const token = {
   async validate(token: string) {
     try {
       if (!env.jwtSecret) {
-        console.error("jwt secret missing");
-        return { ok: false, message: "jwt secret is missing" } as const;
+        return NotOk("jwt secret is missing", undefined);
       }
       // verify the token and return the payload
       const isValidToken = jwt.verify(token, env.jwtSecret) as Payload;
-      return { ok: true, data: isValidToken.data } as const;
+
+      return Ok(isValidToken.data);
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
-        return { ok: false, message: "token expired" } as const;
+        return NotOk("token expired", error.message);
       }
-      console.error(error);
-      return { ok: false, message: "could not validate token" } as const;
+      return NotOk("could not validate token", error instanceof Error ? error.message : undefined);
     }
   },
 
   /** Decode jwt token */
   async decode(token: string) {
     try {
-      /** Data stored in the jwt token */
       const payload = jwt.decode(token) as Payload;
       const { data } = payload;
-      return { ok: true, data } as const;
+      return Ok(data);
     } catch (error) {
-      console.error(error);
-      return { ok: false, message: "an error occured" } as const;
+      return NotOk("an error occured", error instanceof Error ? error.message : undefined);
     }
   },
 };
