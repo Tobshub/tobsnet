@@ -17,7 +17,7 @@ const userRouter = tRouter({
       const res = await signUp(input);
       switch (res.ok) {
         case true: {
-          return { ok: true, token: res.token } as const;
+          return { ok: true, token: res.data } as const;
         }
         case false: {
           switch (res.message) {
@@ -61,7 +61,7 @@ const userRouter = tRouter({
 
       switch (res.ok) {
         case true: {
-          return { ok: res.ok, token: res.token } as const;
+          return { ok: res.ok, token: res.data } as const;
         }
         case false: {
           switch (res.message) {

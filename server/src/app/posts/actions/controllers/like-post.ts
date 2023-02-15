@@ -14,7 +14,7 @@ export async function likePost(userToken: string, id: string) {
         cause: isValidToken.message,
       } as const;
     }
-
+    // FIXIT: check that the user has not liked this post before
     // update record
     const post = await usePrisma.post.update({
       where: { id },

@@ -1,6 +1,8 @@
 import { usePrisma } from "../../../config/prisma";
 import token from "../../auth/token";
 import b from "bcrypt";
+import { NotOk, Ok } from "../../../helpers";
+import { LOG } from "../../../functions";
 
 type props = {
   username: string;
@@ -18,7 +20,7 @@ export async function signUp(userData: props) {
     });
 
     if (userCheck) {
-      return { ok: false, message: "user already exists" } as const;
+      return NotOk("user already exists")
     }
     // hash the password
     const hashedPassword = await b.hash(userData.password, 10);
@@ -33,20 +35,13 @@ export async function signUp(userData: props) {
 
     const genToken = await token.generate(user.id);
 
-    switch (genToken.ok) {
-      case false: {
-        return {
-          ok: genToken.ok,
-          message: "could not generate token",
-          cause: genToken.message,
-        } as const;
-      }
-      case true: {
-        return { ok: genToken.ok, token: genToken.token } as const;
-      }
+    if (genToken.ok) {
+      return Ok(genToken.data);
+    } else {
+      return NotOk("could not generate token", genToken.message);
     }
   } catch (error) {
-    console.error(error);
-    return { ok: false, message: "an error occured", cause: "unkown" } as const;
+    LOG.error(error, "user sign up failed");
+    return NotOk("an error occured", error instanceof Error ? error.message : undefined)
   }
 }

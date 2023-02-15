@@ -1,7 +1,8 @@
 import { usePrisma } from "../../../config/prisma";
-import jwt from "jsonwebtoken";
 import b from "bcrypt";
 import token from "../../auth/token";
+import { NotOk, Ok } from "../../../helpers"
+import { LOG } from "../../../functions";
 
 type props = {
   email: string;
@@ -21,36 +22,26 @@ export async function login(userData: props, options: options) {
     });
 
     if (!user) {
-      return { ok: false, message: "user not found" } as const;
+      return NotOk("user not found");
     }
 
-    const isValidLogin = await comparePassword(
-      userData.password,
-      user.password
-    );
+    const isValidLogin = await comparePassword(userData.password, user.password);
 
     if (!isValidLogin) {
-      return { ok: false, message: "wrong password" } as const;
+      return NotOk("wrong password");
     }
 
     // generate user token
     const userToken = await token.generate(user.id);
 
-    switch (userToken.ok) {
-      case false: {
-        return {
-          ok: userToken.ok,
-          message: "could not generate token",
-          cause: userToken.message,
-        } as const;
-      }
-      case true: {
-        return { ok: userToken.ok, token: userToken.token } as const;
-      }
+    if (userToken.ok) {
+      return Ok(userToken.data);
+    } else {
+      return NotOk("could not generate token", userToken.message)
     }
   } catch (error) {
-    console.error(error);
-    return { ok: false, message: "an error occured" } as const;
+    LOG.error(error, "failed to login user");
+    return NotOk("an error occured", error instanceof Error ? error.message : undefined);
   }
 }
 

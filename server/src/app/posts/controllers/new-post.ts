@@ -1,5 +1,6 @@
 import { usePrisma } from "../../../config";
 import token from "../../auth/token";
+import {Ok, NotOk} from "../../../helpers";
 
 /** Create a new post */
 export async function newPost(userToken: string, content: string) {
@@ -7,11 +8,7 @@ export async function newPost(userToken: string, content: string) {
     // validate the user token
     const validateToken = await token.validate(userToken);
     if (!validateToken.ok) {
-      return {
-        ok: false,
-        message: "token validation failed",
-        cause: validateToken.message,
-      } as const;
+      return NotOk("token validation failed", validateToken.message);  
     }
 
     const slug = await genSlug(validateToken.data);
