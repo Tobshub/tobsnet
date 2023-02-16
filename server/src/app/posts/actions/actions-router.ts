@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { tError, tProcedure, tRouter } from "../../../config";
 import { addComment, deletePost, likePost, unlikePost } from "./controllers";
-import { Ok } from "../../../helpers";
+
 // TODO:
 // unlike post
 // comment on comment
@@ -11,19 +11,19 @@ const postActionRouter = tRouter({
     if (!token) {
       throw new tError({ code: "FORBIDDEN", message: "user token is missing" });
     }
-    const post = await likePost(token, input.postId);
-    if (post.ok) {
-      return Ok(post.data);
+    const res = await likePost(token, input.postId);
+    if (res.ok) {
+      return res;
     } else {
-      switch (post.message) {
+      switch (res.message) {
         case "an error occured": {
-          throw new tError({ code: "INTERNAL_SERVER_ERROR", message: post.message, cause: post.cause });
+          throw new tError({ code: "INTERNAL_SERVER_ERROR", ...res });
         }
         case "post not found": {
-          throw new tError({ code: "NOT_FOUND", message: post.message });
+          throw new tError({ code: "NOT_FOUND", ...res });
         }
         case "token validation failed": {
-          throw new tError({ code: "UNAUTHORIZED", message: post.message, cause: post.cause });
+          throw new tError({ code: "UNAUTHORIZED", ...res });
         }
         default: {
           throw new tError({ message: "unexpected", code: "METHOD_NOT_SUPPORTED" });
@@ -36,20 +36,20 @@ const postActionRouter = tRouter({
     if (!token) {
       throw new tError({ code: "FORBIDDEN", message: "user token is missing" });
     }
-    const post = await unlikePost(token, input.postId);
+    const res = await unlikePost(token, input.postId);
 
-    if (post.ok) {
-      return Ok(post.data);
+    if (res.ok) {
+      return res;
     } else {
-      switch (post.message) {
+      switch (res.message) {
         case "an error occured": {
-          throw new tError({ code: "INTERNAL_SERVER_ERROR", message: post.message, cause: post.cause });
+          throw new tError({ code: "INTERNAL_SERVER_ERROR", ...res });
         }
         case "post not found": {
-          throw new tError({ code: "NOT_FOUND", message: post.message });
+          throw new tError({ code: "NOT_FOUND", ...res });
         }
         case "token validation failed": {
-          throw new tError({ code: "UNAUTHORIZED", message: post.message, cause: post.cause });
+          throw new tError({ code: "UNAUTHORIZED", ...res });
         }
         default: {
           throw new tError({ message: "unexpected", code: "METHOD_NOT_SUPPORTED" });
@@ -63,17 +63,17 @@ const postActionRouter = tRouter({
       throw new tError({ code: "FORBIDDEN", message: "user token is missing" });
     }
 
-    const deletedPost = await deletePost(token, input.postId);
+    const res = await deletePost(token, input.postId);
 
-    if (deletedPost.ok) {
-      return Ok(deletedPost.data);
+    if (res.ok) {
+      return res;
     } else {
-      switch (deletedPost.message) {
+      switch (res.message) {
         case "an error occured": {
-          throw new tError({ message: deletedPost.message, code: "INTERNAL_SERVER_ERROR" });
+          throw new tError({ code: "INTERNAL_SERVER_ERROR", ...res });
         }
         case "post does not belong to this user": {
-          throw new tError({ code: "UNAUTHORIZED", message: "can not delete that post", cause: deletedPost.message });
+          throw new tError({ code: "UNAUTHORIZED", message: "cannot delete that post", cause: res.message });
         }
         default: {
           throw new tError({ message: "unexpected", code: "METHOD_NOT_SUPPORTED" });
@@ -88,20 +88,20 @@ const postActionRouter = tRouter({
       if (!token) {
         throw new tError({ code: "FORBIDDEN", message: "user token is missing" });
       }
-      const comment = await addComment(token, input.postId, { content: input.content });
+      const res = await addComment(token, input.postId, { content: input.content });
 
-      if (comment.ok) {
-        return Ok(comment.data);
+      if (res.ok) {
+        return res;
       } else {
-        switch (comment.message) {
+        switch (res.message) {
           case "an error occured": {
-            throw new tError({ message: comment.message, code: "INTERNAL_SERVER_ERROR", cause: comment.cause });
+            throw new tError({ code: "INTERNAL_SERVER_ERROR", ...res });
           }
           case "post not found": {
-            throw new tError({ code: "NOT_FOUND", message: comment.message, cause: comment.cause });
+            throw new tError({ code: "NOT_FOUND", ...res });
           }
           case "token validation failed": {
-            throw new tError({ code: "UNAUTHORIZED", message: comment.message, cause: comment.cause });
+            throw new tError({ code: "UNAUTHORIZED", ...res });
           }
           default: {
             throw new tError({ message: "unexpected", code: "METHOD_NOT_SUPPORTED" });

@@ -16,7 +16,7 @@ const postRouter = tRouter({
       const feed = await loadFeed({ token, size: 20, cursor: input.cursor });
 
       if (feed.ok) {
-        return Ok(feed.data);
+        return feed;
       } else {
         switch (feed.message) {
           case "an error occured":
@@ -37,17 +37,17 @@ const postRouter = tRouter({
     if (!token) {
       throw new tError({ code: "FORBIDDEN", message: "user token is missing" });
     }
-    const createPost = await newPost(token, input.content);
+    const res = await newPost(token, input.content);
 
-    if (createPost.ok) {
-      return Ok(createPost.data);
+    if (res.ok) {
+      return res;
     } else {
-      switch (createPost.message) {
+      switch (res.message) {
         case "an error occurred": {
-          throw new tError({ code: "INTERNAL_SERVER_ERROR", message: createPost.message, cause: createPost.cause });
+          throw new tError({ code: "INTERNAL_SERVER_ERROR", ...res });
         }
         case "token validation failed": {
-          throw new tError({ code: "UNAUTHORIZED", message: createPost.message, cause: createPost.cause });
+          throw new tError({ code: "UNAUTHORIZED", ...res });
         }
         default: {
           throw new tError({ message: "unexpected", code: "METHOD_NOT_SUPPORTED" });
@@ -56,16 +56,16 @@ const postRouter = tRouter({
     }
   }),
   getPost: tProcedure.input(z.object({ slug: z.string() })).query(async ({ input }) => {
-    const post = await getPost(input.slug);
-    if (post.ok) {
-      return Ok(post.data);
+    const res = await getPost(input.slug);
+    if (res.ok) {
+      return res;
     } else {
-      switch (post.message) {
+      switch (res.message) {
         case "post not found": {
-          throw new tError({ message: "no post was found", code: "NOT_FOUND", cause: post.message });
+          throw new tError({ code: "NOT_FOUND", ...res });
         }
         case "an error occured": {
-          throw new tError({ message: post.message, code: "INTERNAL_SERVER_ERROR" });
+          throw new tError({ code: "INTERNAL_SERVER_ERROR", ...res });
         }
         default: {
           throw new tError({ message: "unexpected", code: "METHOD_NOT_SUPPORTED" });

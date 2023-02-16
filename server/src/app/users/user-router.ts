@@ -2,7 +2,7 @@ import { tRouter, tProcedure, tError } from "../../config";
 import z from "zod";
 import { signUp, login } from "./controllers";
 import token from "../auth/token";
-import { NotOk, Ok } from "../../helpers";
+import { NotOk } from "../../helpers";
 
 /** endpoints for user-related operations */
 const userRouter = tRouter({
@@ -17,7 +17,7 @@ const userRouter = tRouter({
     .mutation(async ({ input }) => {
       const res = await signUp(input);
       if (res.ok) {
-        return Ok(res.data);
+        return res;
       } else {
         switch (res.message) {
           case "an error occured":
@@ -43,7 +43,7 @@ const userRouter = tRouter({
       const res = await login(input.userData, input.options);
 
       if (res.ok) {
-        return Ok(res.data);
+        return res;
       } else {
         switch (res.message) {
           case "an error occured":
