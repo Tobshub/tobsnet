@@ -2,6 +2,7 @@ import { tRouter, tProcedure, tError } from "../../config";
 import z from "zod";
 import { signUp, login } from "./controllers";
 import token from "../auth/token";
+import { NotOk, Ok } from "../../helpers";
 
 /** endpoints for user-related operations */
 const userRouter = tRouter({
@@ -15,81 +16,55 @@ const userRouter = tRouter({
     )
     .mutation(async ({ input }) => {
       const res = await signUp(input);
-      switch (res.ok) {
-        case true: {
-          return { ok: true, token: res.data } as const;
-        }
-        case false: {
-          switch (res.message) {
-            case "an error occured":
-            case "could not generate token": {
-              throw new tError({
-                message: res.message,
-                code: "INTERNAL_SERVER_ERROR",
-              });
-            }
-            case "user already exists": {
-              throw new tError({
-                message: "could not create user",
-                code: "FORBIDDEN",
-                cause: res.message,
-              });
-            }
+      if (res.ok) {
+        return Ok(res.data);
+      } else {
+        switch (res.message) {
+          case "an error occured":
+          case "could not generate token": {
           }
-        }
-        default: {
-          return { ok: false, message: "something unexpected happened" };
+          case "user already exists": {
+            throw new tError({ message: "could not create user", code: "FORBIDDEN", cause: res.message });
+          }
+          default: {
+            throw new tError({ message: "unexpected", code: "INTERNAL_SERVER_ERROR" });
+          }
         }
       }
     }),
   login: tProcedure
     .input(
       z.object({
-        userData: z.object({
-          email: z.string().email(),
-          password: z.string().min(8).max(64),
-        }),
-        options: z.object({
-          expires: z
-            .union([z.literal("short"), z.literal("long")])
-            .default("short"),
-        }),
+        userData: z.object({ email: z.string().email(), password: z.string().min(8).max(64) }),
+        options: z.object({ expires: z.union([z.literal("short"), z.literal("long")]).default("short") }),
       })
     )
     .mutation(async ({ input }) => {
       const res = await login(input.userData, input.options);
 
-      switch (res.ok) {
-        case true: {
-          return { ok: res.ok, token: res.data } as const;
-        }
-        case false: {
-          switch (res.message) {
-            case "an error occured":
-            case "could not generate token": {
-              throw new tError({
-                message: res.message,
-                code: "INTERNAL_SERVER_ERROR",
-              });
-            }
-            case "user not found": {
-              throw new tError({ message: "not found", code: "NOT_FOUND" });
-            }
-            case "wrong password": {
-              throw new tError({
-                message: "invalid login details",
-                code: "UNAUTHORIZED",
-              });
-            }
+      if (res.ok) {
+        return Ok(res.data);
+      } else {
+        switch (res.message) {
+          case "an error occured":
+          case "could not generate token": {
+            throw new tError({ message: res.message, code: "INTERNAL_SERVER_ERROR", cause: res.cause });
+          }
+          case "user not found": {
+            throw new tError({ message: "not found", code: "NOT_FOUND", cause: res.cause });
+          }
+          case "wrong password": {
+            throw new tError({ message: "invalid login details", code: "UNAUTHORIZED", cause: res.cause });
+          }
+          default: {
+            throw new tError({ message: "unexpected", code: "INTERNAL_SERVER_ERROR" });
           }
         }
       }
     }),
   validateToken: tProcedure.query(async ({ ctx }) => {
     const { token: userToken } = ctx.auth;
-    if (!userToken) {
-      return { ok: false, message: "token is missing" };
-    }
+    if (!userToken) return NotOk("token is missing");
     const valid = await token.validate(userToken);
     return valid;
   }),
