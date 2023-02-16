@@ -1,11 +1,9 @@
 import { PrismaType, usePrisma } from "../../../config";
+import { LOG } from "../../../functions";
+import { NotOk, Ok } from "../../../helpers";
 import token from "../../auth/token";
 
-type props = {
-  size: number;
-  token?: string;
-  cursor?: string | null;
-};
+type props = { size: number; token?: string; cursor?: string | null };
 
 /** Generate and load the a feed */
 export async function loadFeed(props: props) {
@@ -14,33 +12,23 @@ export async function loadFeed(props: props) {
     if (props.token) {
       const decoded = await token.decode(props.token);
       if (!decoded.ok) {
-        return { ok: false, message: "an error occured" } as const;
+        return NotOk("failed to decode token", decoded.message);
       }
 
       const id = decoded.data;
 
       const genFeed = await generateFeed(id, props.cursor);
 
-      switch (genFeed.ok) {
-        case true: {
-          return { ok: genFeed.ok, data: genFeed.data } as const;
-        }
-        case false: {
-          return {
-            ok: genFeed.ok,
-            message: "failed to generate feed",
-            cause: genFeed.message,
-          } as const;
-        }
-        default: {
-          throw new Error("something unexpected happened");
-        }
+      if (genFeed.ok) {
+        return Ok(genFeed.data);
+      } else {
+        return NotOk("failed to generate feed", genFeed.message);
       }
     }
-    return { ok: false, message: "user token is missing" } as const;
+    return NotOk("user token is missing");
   } catch (error) {
-    console.error(error);
-    return { ok: false, message: "an error occured" } as const;
+    LOG.error(error);
+    return NotOk("an error occured", error instanceof Error ? error.message : undefined);
   }
 }
 
@@ -55,12 +43,7 @@ async function generateFeed(userId: string, cursor?: props["cursor"]) {
       take: 20,
       orderBy: { likes: "asc" },
       skip: cursor ? 1 : 0,
-      cursor: cursor
-        ? {
-            // cursor based pagination
-            slug: cursor,
-          }
-        : undefined,
+      cursor: cursor ? { slug: cursor } : undefined,
       select: {
         commentCount: true,
         likes: true,
@@ -72,15 +55,9 @@ async function generateFeed(userId: string, cursor?: props["cursor"]) {
       },
     });
 
-    return {
-      ok: true,
-      data: {
-        feed: buzzfeed,
-        cursor: buzzfeed[19]?.slug /* use the last post slug as the cursor */,
-      },
-    } as const;
+    return Ok({ feed: buzzfeed, cursor: buzzfeed[buzzfeed.length - 1]?.slug });
   } catch (error) {
-    console.error(error);
-    return { ok: false, message: "an error occured" } as const;
+    LOG.error(error);
+    return NotOk("an error occured", error instanceof Error ? error.message : undefined);
   }
 }

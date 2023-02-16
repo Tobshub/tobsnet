@@ -27,7 +27,7 @@ const userRouter = tRouter({
             throw new tError({ message: "could not create user", code: "FORBIDDEN", cause: res.message });
           }
           default: {
-            throw new tError({ message: "unexpected", code: "INTERNAL_SERVER_ERROR" });
+            throw new tError({ message: "unexpected", code: "METHOD_NOT_SUPPORTED" });
           }
         }
       }
@@ -57,7 +57,7 @@ const userRouter = tRouter({
             throw new tError({ message: "invalid login details", code: "UNAUTHORIZED", cause: res.cause });
           }
           default: {
-            throw new tError({ message: "unexpected", code: "INTERNAL_SERVER_ERROR" });
+            throw new tError({ message: "unexpected", code: "METHOD_NOT_SUPPORTED" });
           }
         }
       }

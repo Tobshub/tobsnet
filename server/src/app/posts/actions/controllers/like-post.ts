@@ -1,4 +1,6 @@
 import { usePrisma } from "../../../../config";
+import { LOG } from "../../../../functions";
+import { NotOk, Ok } from "../../../../helpers";
 import token from "../../../auth/token";
 
 /** Like a post */
@@ -8,11 +10,7 @@ export async function likePost(userToken: string, id: string) {
     const isValidToken = await token.validate(userToken);
 
     if (!isValidToken.ok) {
-      return {
-        ok: false,
-        message: "token validation failed",
-        cause: isValidToken.message,
-      } as const;
+      return NotOk("token validation failed", isValidToken.message);
     }
     // FIXIT: check that the user has not liked this post before
     // update record
@@ -21,35 +19,19 @@ export async function likePost(userToken: string, id: string) {
       data: {
         likes: { increment: 1 },
         likesUsersIds: { push: isValidToken.data },
-        likesUsers: {
-          // update the user record
-          update: {
-            where: { id: isValidToken.data },
-            data: { likedPostsIds: { push: id } },
-          },
-        },
+        // update the user record
+        likesUsers: { update: { where: { id: isValidToken.data }, data: { likedPostsIds: { push: id } } } },
       },
-      select: {
-        likes: true,
-        slug: true,
-        id: true,
-      },
+      select: { likes: true, slug: true, id: true },
     });
 
     if (!post) {
-      return { ok: false, message: "post not found" } as const;
+      return NotOk("post not found");
     }
 
-    return { ok: true, data: post } as const;
+    return Ok(post);
   } catch (error) {
-    console.error(error);
-    if (error instanceof Error) {
-      return {
-        ok: false,
-        message: "an error occured",
-        cause: error.message,
-      } as const;
-    }
-    return { ok: false, message: "an error occured" } as const;
+    LOG.error(error);
+    return NotOk("an error occured", error instanceof Error ? error.message : undefined);
   }
 }

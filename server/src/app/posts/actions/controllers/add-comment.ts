@@ -1,4 +1,6 @@
 import { usePrisma } from "../../../../config";
+import { LOG } from "../../../../functions";
+import { NotOk, Ok } from "../../../../helpers";
 import token from "../../../auth/token";
 
 type commentProps = {
@@ -6,48 +8,31 @@ type commentProps = {
 };
 
 /** Add comment to post */
-export async function addComment(
-  userToken: string,
-  postId: string,
-  commentData: commentProps
-) {
+export async function addComment(userToken: string, postId: string, commentData: commentProps) {
   try {
     // validate token
     const isValidToken = await token.validate(userToken);
 
     if (!isValidToken.ok) {
-      return {
-        ok: false,
-        message: "token validation failed",
-        cause: isValidToken.message,
-      } as const;
+      return NotOk("token validation failed", isValidToken.message);
     }
 
     const createComment = await usePrisma.post.update({
       where: { id: postId },
       data: {
         commentCount: { increment: 1 },
-        comments: {
-          create: { content: commentData.content, userId: isValidToken.data },
-        },
+        comments: { create: { content: commentData.content, userId: isValidToken.data } },
       },
       select: { commentCount: true, slug: true, id: true },
     });
 
     if (!createComment) {
-      return { ok: false, message: "post not found" } as const;
+      return NotOk("post not found");
     }
 
-    return { ok: true, data: createComment } as const;
+    return Ok(createComment);
   } catch (error) {
-    console.error(error);
-    if (error instanceof Error) {
-      return {
-        ok: false,
-        message: "an error occured",
-        cause: error.message,
-      } as const;
-    }
-    return { ok: false, message: "an error occured" } as const;
+    LOG.error(error);
+    return NotOk("an error occured", error instanceof Error ? error.message : undefined);
   }
 }

@@ -1,4 +1,6 @@
 import { usePrisma } from "../../../config";
+import { LOG } from "../../../functions";
+import { NotOk, Ok } from "../../../helpers";
 
 export async function getPost(slug: string) {
   try {
@@ -10,21 +12,15 @@ export async function getPost(slug: string) {
         commentCount: true,
         likes: true,
         comments: true,
-        user: {
-          select: {
-            username: true,
-            id: true,
-            profileImage: true,
-          },
-        },
+        user: { select: { username: true, id: true, profileImage: true } },
       },
     });
     if (!post) {
-      return { ok: false, message: "post not found" } as const;
+      return NotOk("post not found");
     }
-    return { ok: true, data: post } as const;
+    return Ok(post);
   } catch (error) {
-    console.error(error);
-    return { ok: false, message: "an error occured" } as const;
+    LOG.error(error);
+    return NotOk("an error occured");
   }
 }
