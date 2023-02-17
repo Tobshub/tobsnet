@@ -11,23 +11,23 @@ datasource db {
 }
 
 model User {
-  id              String         @id @default(auto()) @map("_id") @db.ObjectId
-  username        String
-  email           String         @unique
-  password        String
-  bio             String
-  profileImage    Bytes?
-  posts           Post[]
-  likedPosts      Post[]         @relation(name: "LikedPosts", fields: [likedPostsIds], references: [id])
-  likedPostsIds   String[]       @db.ObjectId
-  likedComments   Comment[]      @relation(name: "LikedComments", fields: [likedCommentsId], references: [id])
-  likedCommentsId String[]       @db.ObjectId
-  comments        Comment[]
-  notifications   Notification[]
-  followers       User[]         @relation("Following", fields: [followersIds], references: [id])
-  followersIds    String[]       @db.ObjectId
-  following       User[]         @relation("Following", fields: [followingIds], references: [id])
-  followingIds    String[]       @db.ObjectId
+  id               String         @id @default(auto()) @map("_id") @db.ObjectId
+  username         String
+  email            String         @unique
+  password         String
+  bio              String
+  profileImage     Bytes?
+  posts            Post[]
+  likedPosts       Post[]         @relation(name: "LikedPosts", fields: [likedPostsIds], references: [id])
+  likedPostsIds    String[]       @db.ObjectId
+  likedComments    Comment[]      @relation(name: "LikedComments", fields: [likedCommentsIds], references: [id])
+  likedCommentsIds String[]       @db.ObjectId
+  comments         Comment[]
+  notifications    Notification[]
+  followers        User[]         @relation("Following", fields: [followersIds], references: [id])
+  followersIds     String[]       @db.ObjectId
+  following        User[]         @relation("Following", fields: [followingIds], references: [id])
+  followingIds     String[]       @db.ObjectId
 }
 
 model Post {
