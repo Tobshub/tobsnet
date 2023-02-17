@@ -1,9 +1,8 @@
 import { z } from "zod";
 import { tError, tProcedure, tRouter } from "../../config";
-import { likeComment, newReply } from "./controllers";
+import { deleteComment, likeComment, newReply } from "./controllers";
 
 /* TODO: 
-  like comment
   unlike comment
   delete comment
 */
@@ -63,6 +62,36 @@ const commentRouter = tRouter({
       }
     }
   }),
+  unlikeComment: tProcedure.input(z.object({ id: z.string() })).mutation(async ({ input, ctx }) => {}),
+  deleteComment: tProcedure
+    .input(z.object({ id: z.string(), postId: z.string(), parentId: z.string().optional() }))
+    .mutation(async ({ input, ctx }) => {
+      const { token } = ctx.auth;
+      if (!token) {
+        throw new tError({ code: "FORBIDDEN", message: "user token is missing" });
+      }
+
+      const res = await deleteComment(token, input);
+
+      if (res.ok) {
+        return res;
+      } else {
+        switch (res.message) {
+          case "an error occured": {
+            throw new tError({ code: "INTERNAL_SERVER_ERROR", ...res });
+          }
+          case "comment not found": {
+            throw new tError({ code: "NOT_FOUND", ...res });
+          }
+          case "token validation failed": {
+            throw new tError({ code: "UNAUTHORIZED", ...res });
+          }
+          default: {
+            throw new tError({ code: "METHOD_NOT_SUPPORTED", message: "unexpected" });
+          }
+        }
+      }
+    }),
 });
 
 export default commentRouter;
