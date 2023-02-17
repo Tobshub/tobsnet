@@ -14,7 +14,13 @@ export async function likeComment(userToken: string, commentData: { id: string }
 
     const comment = await usePrisma.comment.update({
       where: { id: commentData.id },
-      data: { likes: { increment: 1 } },
+      data: {
+        likes: { increment: 1 },
+        likesUsersIds: { push: isValidToken.data },
+        likesUsers: {
+          update: { where: { id: isValidToken.data }, data: { likedCommentsId: { push: commentData.id } } },
+        },
+      },
       select: { likes: true, id: true },
     });
 
