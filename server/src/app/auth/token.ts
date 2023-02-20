@@ -13,6 +13,7 @@ const token = {
   async generate(payloadInput: string, options?: { expires: "short" | "long" }) {
     try {
       if (!env.jwtSecret) {
+        LOG.error("jwt secret is missing");
         return NotOk("jwt secret is missing", undefined);
       }
       const payload: Payload = { data: payloadInput, iat: Math.round(Date.now() / 1000) + 60 };
@@ -21,9 +22,9 @@ const token = {
 
       /** generated token from @param payloadInput and `jwt secret` */
       const token = jwt.sign(payload, env.jwtSecret, { expiresIn });
-      LOG.info(token, "new token generated");
       return Ok(token);
     } catch (error) {
+      LOG.error(error, "error generating token");
       return NotOk("could not generate token", error instanceof Error ? error.message : undefined);
     }
   },
@@ -32,6 +33,7 @@ const token = {
   async validate(token: string) {
     try {
       if (!env.jwtSecret) {
+        LOG.error("jwt secret is missing");
         return NotOk("jwt secret is missing", undefined);
       }
       // verify the token and return the payload
@@ -54,6 +56,7 @@ const token = {
       const { data } = payload;
       return Ok(data);
     } catch (error) {
+      LOG.error(error, "error decoding token");
       return NotOk("an error occured", error instanceof Error ? error.message : undefined);
     }
   },
