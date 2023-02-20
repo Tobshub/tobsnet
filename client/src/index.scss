@@ -1,0 +1,63 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+
+  /* COLORS */
+
+  /* highlights */
+  --color-highlights-purple: hsl(333, 93%, 56%);
+  --color-highlights-blue: hsl(194, 85%, 62%);
+  /* purples */
+  --color-purple-50: hsl(309, 77%, 40%);
+  --color-purple-40: hsl(276, 91%, 38%);
+  --color-purple-30: hsl(268, 88%, 36%);
+  --color-purple-20: hsl(263, 87%, 35%);
+  /* blues */
+  --color-blue-20: hsl(258, 86%, 34%);
+  --color-blue-30: hsl(243, 57%, 50%);
+  --color-blue-40: hsl(229, 83%, 60%);
+  --color-blue-50: hsl(212, 84%, 61%);
+  /* neutrals */
+  --color-neutral-100: hsl(210, 17%, 98%);
+  --color-neutral-0: hsl(210, 11%, 15%);
+}
+
+*,
+*::after,
+*::before {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root,
+.page {
+  width: 100vw;
+  width: 100dvw;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+$primary: hsl(333, 93%, 56%);
+$secondary: hsl(194, 85%, 62%);
+$light: hsl(210, 17%, 98%);
+$dark: hsl(210, 11%, 15%);
+
+@import "../node_modules/bootstrap/scss/bootstrap";
+
+.page {
+  overflow-x: hidden;
+  overflow-y: auto;
+  ::-webkit-scrollbar {
+    width: 5px;
+  }
+  scrollbar-width: 5px;
+  color: var(--color-neutral-0);
+}
