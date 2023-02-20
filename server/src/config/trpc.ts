@@ -2,9 +2,7 @@ import { inferAsyncReturnType, initTRPC, TRPCError } from "@trpc/server";
 import * as trpcExpress from "@trpc/server/adapters/express";
 
 /** create context on each request */
-export async function createContext(
-  ctx: trpcExpress.CreateExpressContextOptions
-) {
+export async function createContext(ctx: trpcExpress.CreateExpressContextOptions) {
   const token = ctx.req.headers.authorization;
   return { auth: { token } };
 }
