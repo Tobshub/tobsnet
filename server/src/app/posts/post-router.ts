@@ -26,6 +26,9 @@ const postRouter = tRouter({
           case "user token is missing": {
             throw new tError({ message: "please sign up or login", code: "UNAUTHORIZED", cause: feed.message });
           }
+          case "failed to decode token": {
+            throw new tError({ code: "UNAUTHORIZED", ...feed });
+          }
           default: {
             throw new tError({ message: "unexpected", code: "METHOD_NOT_SUPPORTED" });
           }
