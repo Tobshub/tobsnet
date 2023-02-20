@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import { env } from "../..";
 import { NotOk, Ok } from "../../helpers";
+import { LOG } from "../../functions";
 
 type Payload = {
   iat: number;
@@ -14,12 +15,13 @@ const token = {
       if (!env.jwtSecret) {
         return NotOk("jwt secret is missing", undefined);
       }
-      const payload = { iat: Date.now(), data: payloadInput };
+      const payload: Payload = { data: payloadInput, iat: Math.round(Date.now() / 1000) + 60 };
       /* short logins expire after 1 day */
       const expiresIn = options?.expires === "long" ? 60 * 60 * 24 * 30 : 60 * 60 * 24;
 
       /** generated token from @param payloadInput and `jwt secret` */
       const token = jwt.sign(payload, env.jwtSecret, { expiresIn });
+      LOG.info(token, "new token generated");
       return Ok(token);
     } catch (error) {
       return NotOk("could not generate token", error instanceof Error ? error.message : undefined);
@@ -40,6 +42,7 @@ const token = {
       if (error instanceof jwt.TokenExpiredError) {
         return NotOk("token expired", error.message);
       }
+      LOG.error(error, "could not validate token");
       return NotOk("could not validate token", error instanceof Error ? error.message : undefined);
     }
   },
