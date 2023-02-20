@@ -2,9 +2,6 @@ import { z } from "zod";
 import { tError, tProcedure, tRouter } from "../../config";
 import { deleteComment, likeComment, newReply, unlikeComment } from "./controllers";
 
-/* TODO: 
-  unlike comment
-*/
 const commentRouter = tRouter({
   newReply: tProcedure
     .input(z.object({ content: z.string(), parentId: z.string(), postId: z.string() }))
