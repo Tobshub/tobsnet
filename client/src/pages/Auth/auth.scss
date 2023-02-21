@@ -1,0 +1,26 @@
+.auth-form {
+  width: min(400px, 90%);
+  input.form-control:focus {
+    border-color: transparent;
+    box-shadow: 0 0 0.5rem var(--color-highlights-blue);
+    &:invalid {
+      box-shadow: 0 0 0.5rem var(--color-highlights-purple);
+    }
+  }
+
+  button.btn {
+    color: var(--color-neutral-100);
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    &.btn-primary:not(:disabled) {
+      box-shadow: 0 0 0.5rem var(--color-highlights-purple);
+    }
+  }
+
+  .react-icons {
+    color: var(--color-neutral-100);
+    &:hover {
+      cursor: pointer;
+    }
+  }
+}
