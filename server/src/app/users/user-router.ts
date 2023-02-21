@@ -22,9 +22,10 @@ const userRouter = tRouter({
         switch (res.message) {
           case "an error occured":
           case "could not generate token": {
+            throw new tError({ message: res.message, code: "INTERNAL_SERVER_ERROR", cause: res.cause });
           }
           case "user already exists": {
-            throw new tError({ message: "could not create user", code: "FORBIDDEN", cause: res.message });
+            return res;
           }
           default: {
             throw new tError({ message: "unexpected", code: "METHOD_NOT_SUPPORTED" });
@@ -51,10 +52,10 @@ const userRouter = tRouter({
             throw new tError({ message: res.message, code: "INTERNAL_SERVER_ERROR", cause: res.cause });
           }
           case "user not found": {
-            throw new tError({ message: "not found", code: "NOT_FOUND", cause: res.cause });
+            return res;
           }
           case "wrong password": {
-            throw new tError({ message: "invalid login details", code: "UNAUTHORIZED", cause: res.cause });
+            return res;
           }
           default: {
             throw new tError({ message: "unexpected", code: "METHOD_NOT_SUPPORTED" });
