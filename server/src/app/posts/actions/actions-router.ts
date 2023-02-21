@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { tError, tProcedure, tRouter } from "../../../config";
 import { addComment, deletePost, likePost, unlikePost } from "./controllers";
+import { NotOk } from "../../../helpers";
 
 // TODO:
 // unlike post
@@ -24,6 +25,9 @@ const postActionRouter = tRouter({
         }
         case "token validation failed": {
           throw new tError({ code: "UNAUTHORIZED", ...res });
+        }
+        case "user has already liked this post": {
+          return res;
         }
         default: {
           throw new tError({ message: "unexpected", code: "METHOD_NOT_SUPPORTED" });

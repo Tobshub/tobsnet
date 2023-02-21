@@ -12,7 +12,15 @@ export async function likePost(userToken: string, id: string) {
     if (!isValidToken.ok) {
       return NotOk("token validation failed", isValidToken.message);
     }
-    // FIXIT: check that the user has not liked this post before
+    // FIXIT: check that the user has not liked this post already
+    const checkUser = await usePrisma.post.findUnique({
+      where: { id },
+      select: { likesUsers: { where: { id: isValidToken.data } } },
+    });
+
+    if (checkUser && checkUser.likesUsers.length) {
+      return NotOk("user has already liked this post");
+    }
     // update record
     const post = await usePrisma.post.update({
       where: { id },
