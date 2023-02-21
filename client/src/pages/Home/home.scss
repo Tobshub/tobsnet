@@ -4,14 +4,29 @@
       width: 5px;
     }
     scrollbar-width: 5px;
+    width: 100%;
+    padding: 1rem 2.5rem;
+
+    div.post {
+      border: 2px outset var(--color-highlights-purple);
+      border-radius: 10px;
+      box-shadow: 0 0 0.5rem 0.2rem var(--color-highlights-purple);
+      padding: 0.5rem 1.5rem;
+      width: 100%;
+
+      div.stats {
+        font-size: 1.25rem;
+        display: flex;
+        justify-content: flex-end;
+        gap: 2rem;
+
+        span {
+          cursor: pointer;
+        }
+      }
+    }
   }
   .page-section {
     min-height: 100%;
-  }
-
-  header.page-section {
-    border-right: 1px solid var(--color-neutral-100);
-    width: min(25%, 250px);
-    padding: 0.5rem 1rem;
   }
 }
