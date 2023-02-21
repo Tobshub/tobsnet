@@ -41,8 +41,8 @@ body,
 .page {
   width: 100vw;
   width: 100dvw;
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
 }
 
 $primary: hsl(333, 93%, 56%);
@@ -53,12 +53,7 @@ $dark: hsl(210, 11%, 15%);
 @import "../node_modules/bootstrap/scss/bootstrap";
 
 .page {
-  overflow-x: hidden;
-  overflow-y: auto;
-  ::-webkit-scrollbar {
-    width: 5px;
-  }
-  scrollbar-width: 5px;
+  overflow: hidden;
   color: var(--color-neutral-100);
   background-color: var(--color-neutral-0);
 }
