@@ -4,12 +4,13 @@ import AuthPage from "./components/auth";
 
 export default function SignUpPage() {
   const [content, setContent] = useState({ email: "", password: "", username: "" });
-
-  const handleChange = (name: "email" | "password" | "username", text: string) =>
-    setContent((state) => ({ ...state, [name]: text }));
-
   const [canSubmit, setCanSubmit] = useState(false);
   const validContent = !!content.email && !!content.password && !!content.username;
+
+  const handleChange = (name: "email" | "password" | "username", text: string) => {
+    setContent((state) => ({ ...state, [name]: text }));
+    if (!canSubmit) setCanSubmit(true);
+  };
 
   const navigate = useNavigate();
   const nextFn = () => {
@@ -23,7 +24,7 @@ export default function SignUpPage() {
           <span className="form-label d-block">Username:</span>
           <input
             className="form-control"
-            type="email"
+            type="text"
             placeholder="Cool_Guy_77"
             onChange={(e) => handleChange("username", e.target.value)}
           />

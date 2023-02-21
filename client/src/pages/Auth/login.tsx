@@ -4,12 +4,13 @@ import AuthPage from "./components/auth";
 
 export default function LoginPage() {
   const [content, setContent] = useState({ email: "", password: "" });
-
-  const handleChange = (name: "email" | "password", text: string) =>
-    setContent((state) => ({ ...state, [name]: text }));
-
   const [canSubmit, setCanSubmit] = useState(false);
   const validContent = !!content.email && !!content.password;
+
+  const handleChange = (name: "email" | "password", text: string) => {
+    setContent((state) => ({ ...state, [name]: text }));
+    if (!canSubmit) setCanSubmit(true);
+  };
 
   const navigate = useNavigate();
   const nextFn = () => {
