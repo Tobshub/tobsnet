@@ -1,5 +1,5 @@
 import { appQueryClient, trpcClient } from "@context/trpc";
-import LoginPage from "@pages/Auth/login";
+import { LoginPage, SignUpPage, loader as authLoader } from "@pages/Auth";
 import SignUpPage from "@pages/Auth/signUp";
 import { QueryClientProvider } from "@tanstack/react-query";
 import trpc from "@utils/trpc";
@@ -12,6 +12,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/auth",
+    loader: authLoader,
     children: [
       {
         path: "login",

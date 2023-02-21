@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import AuthPage from "./components/auth";
 
-export default function SignUpPage() {
+export function SignUpPage() {
   const [content, setContent] = useState({ email: "", password: "", username: "" });
   const [canSubmit, setCanSubmit] = useState(false);
   const validContent = !!content.email && !!content.password && !!content.username;
