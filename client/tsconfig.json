@@ -20,7 +20,8 @@
       "@server/*": ["../server/*"],
       "@utils/*": ["src/utils/*"],
       "@context/*": ["src/context/*"],
-      "@services/*": ["src/services/*"]
+      "@services/*": ["src/services/*"],
+      "@pages/*": ["src/pages/*"]
     }
   },
   "include": ["src"],
