@@ -41,7 +41,7 @@ async function generateFeed(userId: string, cursor?: props["cursor"]) {
   try {
     const buzzfeed = await usePrisma.post.findMany({
       take: 20,
-      orderBy: { likes: "asc" },
+      orderBy: { likes: "desc" },
       skip: cursor ? 1 : 0,
       cursor: cursor ? { slug: cursor } : undefined,
       select: {
